@@ -28,16 +28,12 @@ public class ScriptRunner implements Runnable{
     public void run() {
         try {
             engine.eval(scriptText);
-            //scriptFinished = 1;
         }
         catch (ScriptException se)
         {
-            //System.out.println(se.getMessage());
             scriptResult.write(se.getMessage());
-            //scriptFinished = 2;
         }
 
         System.out.println(scriptResult);
-
     }
 }

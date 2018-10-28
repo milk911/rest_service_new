@@ -3,11 +3,10 @@ package services;
 import java.io.StringWriter;
 import java.util.concurrent.Future;
 
-
 public class RequestInfo {
 
     private StringWriter    scriptResult;
-    private Integer         errorStatus = 0;
+    private Integer         completeStatus = 0;
     private Future          handler;
 
     private RequestInfo() {
@@ -21,5 +20,13 @@ public class RequestInfo {
 
     public void setHandler(Future handler) {
         this.handler = handler;
+    }
+
+    public Future getHandler() {
+        return handler;
+    }
+
+    public StringWriter getScriptResult() {
+        return scriptResult;
     }
 }
