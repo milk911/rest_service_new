@@ -25,6 +25,7 @@ public class MyWebAppInitializer implements WebApplicationInitializer {
             Class.forName(ScriptActions.class.getName());
         }
         catch (ClassNotFoundException ex) {
+            ex.printStackTrace();
             throw new ServletException("Error by initializing servlet logic");
         }
 

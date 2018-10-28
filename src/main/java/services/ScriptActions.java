@@ -1,10 +1,10 @@
 package services;
 
 import org.springframework.http.HttpStatus;
+
 import javax.script.*;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,33 +22,33 @@ public class ScriptActions {
     public static void postScript(String scriptText, HttpServletResponse response) {
         int newId = counter.incrementAndGet();
         ScriptEngine engine = factory.getEngineByName("nashorn");
-        StringWriter scriptResult = getEngineScriptResult(engine);
 
         if (!compileScript(engine, scriptText, response)) {
             return;
         }
 
-        RequestInfo requestInfo = RequestInfo.getNewRequestInfo(scriptResult);
+        RequestInfo requestInfo = RequestInfo.getNewRequestInfo(engine, scriptText);
         history.put(newId, requestInfo);
 
-        ScriptRunner scriptRunner = ScriptRunner.getNewScriptRunner(scriptResult, engine, scriptText, newId);
-        requestInfo.setHandler(service.submit(scriptRunner));
+        requestInfo.setHandler(service.submit(requestInfo));
         response.addHeader("Location", "/scripts/" + newId);
     }
 
     public static void getResult(RequestInfo requestInfo, HttpServletResponse response) {
+        if (!checkRequestInfoNullable(requestInfo, response)) return;
+        if (requestInfo.getCompleteStatus()==2) {
+            sendError(response, HttpStatus.BAD_REQUEST, requestInfo.getScriptResult().toString()); // 400
+            return;
+        }
+        else if (requestInfo.getCompleteStatus()==1) {
+            response.setStatus(HttpStatus.ACCEPTED.value()); //202
+        }
         printResultText(response, requestInfo.getScriptResult().toString());
     }
 
     public static void stopScript(RequestInfo requestInfo, HttpServletResponse response) {
+        if (!checkRequestInfoNullable(requestInfo, response)) return;
         requestInfo.getHandler().cancel(true);
-    }
-
-    public static StringWriter getEngineScriptResult(ScriptEngine engine) {
-        StringWriter scriptResult = new StringWriter();
-        ScriptContext context = engine.getContext();
-        context.setWriter(scriptResult);
-        return scriptResult;
     }
 
     public static boolean compileScript(ScriptEngine engine, String scriptText, HttpServletResponse response) {
@@ -58,7 +58,7 @@ public class ScriptActions {
             return true;
         }
         catch (ScriptException e) {
-            sendError(response, HttpStatus.BAD_REQUEST, e.getMessage());
+            sendError(response, HttpStatus.BAD_REQUEST, e.getMessage()); // 400
             return false;
         }
     }
@@ -68,7 +68,7 @@ public class ScriptActions {
             response.getWriter().print(text);
         }
         catch (IOException ex) {
-            sendError(response, HttpStatus.INTERNAL_SERVER_ERROR, "");
+            sendError(response, HttpStatus.INTERNAL_SERVER_ERROR, ""); // 500
         }
     }
 
@@ -77,8 +77,16 @@ public class ScriptActions {
             response.sendError(errorStatus.value(), errorText);
         }
         catch (IOException ex) {
-            // TODO:
+            ex.printStackTrace();
         }
+    }
+
+    private static boolean checkRequestInfoNullable(RequestInfo requestInfo, HttpServletResponse response) {
+        if (requestInfo == null) {
+            sendError(response, HttpStatus.NOT_FOUND, "Script doesn't exist");
+            return false;
+        }
+        return true;
     }
 
     public static Map<Integer, RequestInfo> getHistory() {

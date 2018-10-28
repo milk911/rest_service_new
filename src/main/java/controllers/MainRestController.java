@@ -19,21 +19,15 @@ public class MainRestController {
     @RequestMapping(value="/scripts/{id}", method= RequestMethod.GET)
     @ResponseStatus(HttpStatus.OK)
     public void getScriptResult(@PathVariable("id") RequestInfo requestInfo, HttpServletResponse response) {
-        checkRequestInfoNullable(requestInfo, response);
-        ScriptActions.getResult(requestInfo, response);
+         ScriptActions.getResult(requestInfo, response);
     }
 
     @RequestMapping(value="/scripts/{id}", method= RequestMethod.DELETE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void DeleteScript(@PathVariable("id") RequestInfo requestInfo, HttpServletResponse response) {
-        checkRequestInfoNullable(requestInfo, response);
         ScriptActions.stopScript(requestInfo, response);
     }
 
-    private static void checkRequestInfoNullable(RequestInfo requestInfo, HttpServletResponse response) {
-        if (requestInfo == null) {
-            ScriptActions.sendError(response, HttpStatus.NOT_FOUND, "");
-        }
-    }
+
 }
 
