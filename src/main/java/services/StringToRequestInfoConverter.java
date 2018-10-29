@@ -3,8 +3,6 @@ package services;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
-import javax.servlet.ServletException;
-
 public class StringToRequestInfoConverter implements Converter<String, RequestInfo> {
     @Nullable
     @Override

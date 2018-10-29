@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration monitorInterval="3">
+    <appenders>
+        <File name="FILE" fileName="logs/RestService/errors.log">
+            <PatternLayout pattern="%d{ISO8601} [%-5p] (%F:%L) - %m%n"/>
+        </File>
+    </appenders>
+    <loggers>
+        <root level="INFO">
+            <appender-ref ref="FILE"/>
+        </root>
+    </loggers>
+
+</configuration>

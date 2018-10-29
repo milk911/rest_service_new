@@ -10,21 +10,21 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/")
 public class MainRestController {
 
-    @RequestMapping(value="/scripts", method= RequestMethod.POST)
+    @PostMapping(value="/scripts")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public void StartScript(@RequestBody String scriptText, HttpServletResponse response) {
+    public void startScript(@RequestBody String scriptText, HttpServletResponse response) {
         ScriptActions.postScript(scriptText, response);
      }
 
-    @RequestMapping(value="/scripts/{id}", method= RequestMethod.GET)
+    @GetMapping(value="/scripts/{id}")
     @ResponseStatus(HttpStatus.OK)
     public void getScriptResult(@PathVariable("id") RequestInfo requestInfo, HttpServletResponse response) {
          ScriptActions.getResult(requestInfo, response);
     }
 
-    @RequestMapping(value="/scripts/{id}", method= RequestMethod.DELETE)
+    @DeleteMapping(value="/scripts/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void DeleteScript(@PathVariable("id") RequestInfo requestInfo, HttpServletResponse response) {
+    public void deleteScript(@PathVariable("id") RequestInfo requestInfo, HttpServletResponse response) {
         ScriptActions.stopScript(requestInfo, response);
     }
 

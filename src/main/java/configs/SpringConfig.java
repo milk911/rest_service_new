@@ -16,6 +16,4 @@ public class SpringConfig implements WebMvcConfigurer {
     public void addFormatters(FormatterRegistry registry) {
         registry.addConverter(new StringToRequestInfoConverter());
     }
-
-
 }

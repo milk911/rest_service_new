@@ -1,8 +1,14 @@
 package services;
 
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 
-import javax.script.*;
+import javax.script.Compilable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
@@ -18,6 +24,7 @@ public class ScriptActions {
     private static Map<Integer, RequestInfo>    history = Collections.synchronizedMap(new HashMap<Integer, RequestInfo>());
     private static ExecutorService              service = Executors.newScheduledThreadPool(10);
     private static ScriptEngineManager          factory = new ScriptEngineManager();
+    private static Logger                       scriptLogger  = LogManager.getLogger(ScriptActions.class.getName());
 
     public static void postScript(String scriptText, HttpServletResponse response) {
         int newId = counter.incrementAndGet();
@@ -32,6 +39,8 @@ public class ScriptActions {
 
         requestInfo.setHandler(service.submit(requestInfo));
         response.addHeader("Location", "/scripts/" + newId);
+
+        scriptLogger.info("New request ID: " + newId);
     }
 
     public static void getResult(RequestInfo requestInfo, HttpServletResponse response) {
@@ -54,7 +63,7 @@ public class ScriptActions {
     public static boolean compileScript(ScriptEngine engine, String scriptText, HttpServletResponse response) {
         Compilable compilingEngine = (Compilable) engine;
         try {
-            CompiledScript compiledScript = compilingEngine.compile(scriptText);
+            compilingEngine.compile(scriptText);
             return true;
         }
         catch (ScriptException e) {
@@ -68,7 +77,7 @@ public class ScriptActions {
             response.getWriter().print(text);
         }
         catch (IOException ex) {
-            sendError(response, HttpStatus.INTERNAL_SERVER_ERROR, ""); // 500
+            scriptLogger.error( "Sending text failed", ex);
         }
     }
 
@@ -77,7 +86,7 @@ public class ScriptActions {
             response.sendError(errorStatus.value(), errorText);
         }
         catch (IOException ex) {
-            ex.printStackTrace();
+            scriptLogger.error( "Sending error failed", ex);
         }
     }
 
@@ -87,6 +96,9 @@ public class ScriptActions {
             return false;
         }
         return true;
+    }
+
+    private ScriptActions() {
     }
 
     public static Map<Integer, RequestInfo> getHistory() {
